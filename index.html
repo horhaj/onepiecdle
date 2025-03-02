@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece Character Guesser</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚓</text></svg>">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Roboto:wght@400;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #0a1c3d;
+            color: #f0f0f0;
+            background-image: url('https://i.ibb.co/kmf3tFw/one-piece-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(10, 28, 61, 0.85);
+            z-index: -1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://i.ibb.co/m86hSjx/header-border.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        .pirate-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            display: block;
+            filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.5));
+        }
+        
+        h1 {
+            font-family: 'Luckiest Guy', cursive;
+            color: #ffcc00;
+            margin: 15px 0;
+            font-size: 2.8rem;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 204, 0, 0.4);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            font-weight: bold;
+        }
+        
+        .game-rules {
+            background-color: rgba(255, 204, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffcc00;
+            font-size: 0.9rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+        }
+        
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            color: #333;
+            border: 3px solid #ffcc00;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #d32f2f, #ffcc00, #d32f2f);
+        }
+        
+        .input-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        #character-input {
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #0a1c3d;
+            border-radius: 4px 0 0 4px;
+            width: 250px;
+            margin-right: 0;
+            background-color: #f5f5f5;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            background-color: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .attempts-display {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background-color: #0a1c3d;
+            color: white;
+            padding: 10px;
+            border-radius: 50px;
+            width: 60%;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .attempts-display::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            100% {
+                left: 125%;
+            }
+        }
+        
+        #attempts-left {
+            color: #ffcc00;
+            font-size: 1.3rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 2px solid #0a1c3d;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #0a1c3d;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .result-row {
+            transition: background-color 0.3s;
+        }
+        
+        .match {
+            background-color: #a5d6a7;
+            border-left: 6px solid #388e3c;
+        }
+        
+        .match td:last-child::before {
+            content: "✅ ";
+        }
+        
+        .no-match {
+            background-color: #ef9a9a;
+            border-left: 6px solid #d32f2f;
+        }
+        
+        .no-match td:last-child::before {
+            content: "❌ ";
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .previous-guesses {
+            margin-top: 30px;
+            background-color: rgba(10, 28, 61, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .previous-guesses h3 {
+            margin-top: 0;
+            color: #0a1c3d;
+            border-bottom: 2px solid #ffcc00;
+            padding-bottom: 8px;
+        }
+        
+        #previous-guesses-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        #previous-guesses-container p {
+            background-color: #0a1c3d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin: 0;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .game-over {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .win {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+        
+        .win::before {
+            content: "🏆 ";
+        }
+        
+        .lose {
+            background-color: #ffcdd2;
+            color: #c62828;
+            border: 2px solid #f44336;
+        }
+        
+        .lose::before {
+            content: "☠️ ";
+        }
+        
+        h3 {
+            color: #0a1c3d;
+        }
+        
+        .attribute-icon {
+            margin-right: 5px;
+            font-size: 1.2em;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #ddd;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .play-again {
+            background-color: #ffcc00;
+            color: #0a1c3d;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .play-again:hover {
+            background-color: #ffd740;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .attempts-display {
+                width: 90%;
+            }
+            
+            .game-rules {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://i.ibb.co/NZcpFvy/straw-hat.png" alt="Straw Hat Pirate Logo" class="pirate-logo">
+        <h1>One Piece Character Guesser</h1>
+        <div class="subtitle">Find the mystery pirate in 6 tries or face Davy Jones' locker!</div>
+    </div>
+    
+    <div class="game-rules">
+        <p>🏴‍☠️ Guess the hidden One Piece character! After each guess, you'll see which attributes match the secret character. Green means it's a match, red means it doesn't match. Use the clues wisely, pirate!</p>
+    </div>
+    
+    <div class="game-container">
+        <div class="attempts-display">
+            <span style="margin-right: 5px;">⏱️</span> Attempts remaining: <span id="attempts-left">6</span>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" id="character-input" placeholder="Enter character name...">
+            <button id="guess-button">Guess</button>
+        </div>
+        
+        <div id="result-table-container" class="hidden">
+            <h3>Your last guess:</h3>
+            <table id="result-table">
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody id="result-body">
+                    <!-- Rows will be added here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="previous-guesses">
+            <h3>Previous guesses:</h3>
+            <div id="previous-guesses-container">
+                <!-- Previous guesses will be displayed here -->
+            </div>
+        </div>
+        
+        <div id="game-over-container" class="hidden">
+            <div id="game-over-message" class="game-over"></div>
+            <button id="play-again-button" class="play-again">Play Again</button>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Created with ❤️ for One Piece fans | Images from public sources
+    </div>
+
+    <script>
+        // Sample character data - this would be expanded in a full version
+        const characters = [
+            {
+                name: "Luffy",
+                species: "Human",
+                bounty: 3000000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "Gomu Gomu no Mi (Hito Hito no Mi, Model: Nika)"
+            },
+            {
+                name: "Zoro",
+                species: "Human",
+                bounty: 1111000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Nami",
+                species: "Human",
+                bounty: 366000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Sanji",
+                species: "Human",
+                bounty: 1032000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Law",
+                species: "Human",
+                bounty: 3000000000,
+                firstAppearance: "Sabaody Archipelago Arc",
+                affiliation: "Heart Pirates",
+                devilFruit: "Ope Ope no Mi"
+            },
+            {
+                name: "Robin",
+                species: "Human",
+                bounty: 930000000,
+                firstAppearance: "Alabasta Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "Hana Hana no Mi"
+            },
+            {
+                name: "Chopper",
+                species: "Reindeer",
+                bounty: 1000,
+                firstAppearance: "Drum Island Arc",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "Hito Hito no Mi"
+            },
+            {
+                name: "Brook",
+                species: "Human (Skeleton)",
+                bounty: 383000000,
+                firstAppearance: "Thriller Bark Arc",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "Yomi Yomi no Mi"
+            },
+            {
+                name: "Franky",
+                species: "Human (Cyborg)",
+                bounty: 394000000,
+                firstAppearance: "Water 7 Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Jinbe",
+                species: "Fish-Man",
+                bounty: 1100000000,
+                firstAppearance: "Impel Down Arc",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Usopp",
+                species: "Human",
+                bounty: 500000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Straw Hat Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Shanks",
+                species: "Human",
+                bounty: 4048900000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Red Hair Pirates",
+                devilFruit: "None"
+            },
+            {
+                name: "Buggy",
+                species: "Human",
+                bounty: 3189000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Cross Guild",
+                devilFruit: "Bara Bara no Mi"
+            },
+            {
+                name: "Crocodile",
+                species: "Human",
+                bounty: 1965000000,
+                firstAppearance: "Alabasta Saga",
+                affiliation: "Cross Guild",
+                devilFruit: "Suna Suna no Mi"
+            },
+            {
+                name: "Mihawk",
+                species: "Human",
+                bounty: 3590000000,
+                firstAppearance: "East Blue Saga",
+                affiliation: "Cross Guild",
+                devilFruit: "None"
+            }
+            // Add more characters as needed
+        ];
+        
+        // Icons for attributes
+        const attributeIcons = {
+            "Name": "👤",
+            "Species": "🧬",
+            "Bounty": "💰",
+            "First Appearance": "📜",
+            "Affiliation": "⚓",
+            "Devil Fruit": "🍎"
+        };
+        
+        // Game variables
+        let targetCharacter;
+        let attemptsLeft = 6;
+        let gameOver = false;
+        
+        // DOM elements
+        const characterInput = document.getElementById('character-input');
+        const guessButton = document.getElementById('guess-button');
+        const attemptsLeftDisplay = document.getElementById('attempts-left');
+        const resultTableContainer = document.getElementById('result-table-container');
+        const resultBody = document.getElementById('result-body');
+        const previousGuessesContainer = document.getElementById('previous-guesses-container');
+        const gameOverContainer = document.getElementById('game-over-container');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const playAgainButton = document.getElementById('play-again-button');
+        
+        // Format bounty with commas
+        function formatBounty(bounty) {
+            return bounty.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Initialize the game
+        function initGame() {
+            // Select a random character
+            targetCharacter = characters[Math.floor(Math.random() * characters.length)];
+            console.log("Target character:", targetCharacter.name); // For debugging
+            
+            // Reset game state
+            attemptsLeft = 6;
+            gameOver = false;
+            attemptsLeftDisplay.textContent = attemptsLeft;
+            resultTableContainer.classList.add('hidden');
+            previousGuessesContainer.innerHTML = '';
+            gameOverContainer.classList.add('hidden');
+            characterInput.value = '';
+            characterInput.focus();
+        }
+        
+        // Handle guess submission
+        guessButton.addEventListener('click', function() {
+            if (gameOver) return;
+            
+            const guessName = characterInput.value.trim();
+            if (!guessName) return;
+            
+            // Find the character by name (case insensitive)
+            const guessedCharacter = characters.find(char => 
+                char.name.toLowerCase() === guessName.toLowerCase()
+            );
+            
+            if (!guessedCharacter) {
+                alert("Character not found! Try another name.");
+                return;
+            }
+            
+            // Process guess
+            processGuess(guessedCharacter);
+            
+            // Clear input
+            characterInput.value = '';
+            characterInput.focus();
+        });
+        
+        // Process a character guess
+        function processGuess(guessedCharacter) {
+            attemptsLeft--;
+            attemptsLeftDisplay.textContent = attemptsLeft;
+            
+            // Clear previous result
+            resultBody.innerHTML = '';
+            resultTableContainer.classList.remove('hidden');
+            
+            // Create result table for each attribute
+            createAttributeRow("Name", guessedCharacter.name);
+            createAttributeRow("Species", guessedCharacter.species);
+            createAttributeRow("Bounty", formatBounty(guessedCharacter.bounty) + " Berry");
+            createAttributeRow("First Appearance", guessedCharacter.firstAppearance);
+            createAttributeRow("Affiliation", guessedCharacter.affiliation);
+            createAttributeRow("Devil Fruit", guessedCharacter.devilFruit);
+            
+            // Add to previous guesses
+            const guessRecord = document.createElement('p');
+            guessRecord.textContent = `${guessedCharacter.name}`;
+            previousGuessesContainer.appendChild(guessRecord);
+            
+            // Check for win
+            if (guessedCharacter.name === targetCharacter.name) {
+                gameOver = true;
+                gameOverMessage.textContent = `You found ${targetCharacter.name}! The One Piece is yours!`;
+                gameOverMessage.className = 'game-over win';
+                gameOverContainer.classList.remove('hidden');
+            } 
+            // Check for loss
+            else if (attemptsLeft <= 0) {
+                gameOver = true;
+                gameOverMessage.textContent = `Game Over! The pirate was ${targetCharacter.name}.`;
+                gameOverMessage.className = 'game-over lose';
+                gameOverContainer.classList.remove('hidden');
+            }
+        }
+        
+        // Create a row for an attribute in the result table
+        function createAttributeRow(attrName, attrValue) {
+            // For comparison, normalize bounty to number only
+            let targetValue = targetCharacter[attrName.toLowerCase().replace(' ', '')];
+            let guessValue = attrValue;
+            
+            if (attrName === "Bounty") {
+                targetValue = targetCharacter.bounty;
+                guessValue = parseInt(attrValue.replace(/[^\d]/g, ''));
+            }
+            
+            const isMatch = targetValue === guessValue;
+            
+            const row = document.createElement('tr');
+            
+            const attrCell = document.createElement('td');
+            const iconSpan = document.createElement('span');
+            iconSpan.textContent = attributeIcons[attrName] + " ";
+            iconSpan.className = "attribute-icon";
+            attrCell.appendChild(iconSpan);
+            attrCell.appendChild(document.createTextNode(attrName));
+            
+            const valueCell = document.createElement('td');
+            valueCell.textContent = attrValue;
+            
+            const resultCell = document.createElement('td');
+            resultCell.textContent = isMatch ? "Match" : "No Match";
+            
+            row.appendChild(attrCell);
+            row.appendChild(valueCell);
+            row.appendChild(resultCell);
+            
+            row.classList.add('result-row');
+            row.classList.add(isMatch ? 'match' : 'no-match');
+            
+            resultBody.appendChild(row);
+            
+            // For bounty, add hint about higher/lower if not a match
+            if (attrName === "Bounty" && !isMatch) {
+                const hintRow = document.createElement('tr');
+                const hintCell = document.createElement('td');
+                hintCell.colSpan = 3;
+                
+                if (guessValue < targetValue) {
+                    hintCell.textContent = "💡 Hint: The target character has a higher bounty";
+                } else {
+                    hintCell.textContent = "💡 Hint: The target character has a lower bounty";
+                }
+                
+                hintCell.style.backgroundColor = "#fff3cd";
+                hintCell.style.color = "#856404";
+                hintCell.style.padding = "8px";
+                hintCell.style.fontStyle = "italic";
+                
+                hintRow.appendChild(hintCell);
+                resultBody.appendChild(hintRow);
+            }
+        }
+        
+        // Allow pressing Enter to submit
+        characterInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                guessButton.click();
+            }
+        });
+        
+        // Play Again button
+        playAgainButton.addEventListener('click', initGame);
+        
+        // Initialize the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
